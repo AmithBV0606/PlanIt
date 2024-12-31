@@ -1,16 +1,44 @@
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "./ui/button";
+import { PenBox } from "lucide-react";
+import UserMenu from "./user-menu";
 
 const Header = () => {
   return (
-    <div>
-      <SignedOut>
-        <SignInButton />
-      </SignedOut>
+    <header className="container mx-auto">
+      <nav className="py-6 px-6 flex justify-between items-center">
+        <Link href="/">
+          <Image
+            src={"/PlanIt.png"}
+            alt="PlanIt Logo"
+            width={400}
+            height={60}
+            className="h-12 w-auto object-contain"
+          />
+        </Link>
 
-      <SignedIn>
-        <UserButton />
-      </SignedIn>
-    </div>
+        <div className="flex items-center gap-4">
+          <Link href={"/project/create"}>
+            <Button variant={"destructive"} className="flex items-center gap-2">
+              <PenBox size={18} />
+              <span>Create Project</span>
+            </Button>
+          </Link>
+          
+          <SignedOut>
+            <SignInButton forceRedirectUrl={"/onboarding"}>
+              <Button variant={"secondary"}>Login</Button>
+            </SignInButton>
+          </SignedOut>
+
+          <SignedIn>
+            <UserMenu />
+          </SignedIn>
+        </div>
+      </nav>
+    </header>
   );
 };
 
