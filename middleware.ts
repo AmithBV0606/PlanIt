@@ -1,6 +1,18 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { auth, clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default clerkMiddleware();
+// This variable will have all the routes, which should be kept in private for unauthorized users.
+const isProtected = createRouteMatcher([
+  "/onboarding(.*)",
+  "/organisation(.*)",
+  "/project(.*)",
+  "/issue(.*)",
+]);
+
+export default clerkMiddleware((auth, req) => {
+  if (!auth().userId && isProtected(req)) {
+    return auth().redirectToSignIn();
+  }
+});
 
 export const config = {
   matcher: [
