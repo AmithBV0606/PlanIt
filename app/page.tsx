@@ -4,6 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Calendar, ChevronRight, Layout } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import faqs from "@/data/faqs.json";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const features = [
   {
@@ -85,6 +92,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Carousel Section */}
       <section className="py-20">
         <div className="container mx-auto">
           <h3 className="text-3xl font-bold mb-12 text-center">
@@ -92,6 +100,24 @@ export default function Home() {
           </h3>
 
           <CompanyCarousel />
+        </div>
+      </section>
+
+      {/* FAQ's Section */}
+      <section className="bg-gray-900 py-20 px-5">
+        <div className="container mx-auto">
+          <h3 className="text-3xl font-bold mb-12 text-center">
+            Frequently Asked Questions
+          </h3>
+
+          <Accordion type="single" collapsible className="w-full">
+            {faqs.map((faq, index) => (
+              <AccordionItem value={`item-${index}`} key={index} className="border-b border-gray-600">
+                <AccordionTrigger className="hover:no-underline text-base">{faq.question}</AccordionTrigger>
+                <AccordionContent className="text-sm text-gray-400">{faq.answer}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
     </div>
