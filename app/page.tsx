@@ -1,3 +1,4 @@
+import CompanyCarousel from "@/components/company-carousel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Calendar, ChevronRight, Layout } from "lucide-react";
@@ -71,14 +72,26 @@ export default function Home() {
               return (
                 <Card key={index}>
                   <CardContent className="pt-6">
-                    <feature.icon className="h-12 w-12 mb-4 text-blue-500"/>
-                    <h4 className="text-xl font-semibold mb-2">{feature.title}</h4>
+                    <feature.icon className="h-12 w-12 mb-4 text-blue-500" />
+                    <h4 className="text-xl font-semibold mb-2">
+                      {feature.title}
+                    </h4>
                     <p className="text-gray-400">{feature.description}</p>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
+        </div>
+      </section>
+
+      <section className="py-20">
+        <div className="container mx-auto">
+          <h3 className="text-3xl font-bold mb-12 text-center">
+            Trusted by Industry Leaders
+          </h3>
+
+          <CompanyCarousel />
         </div>
       </section>
     </div>
