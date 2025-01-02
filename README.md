@@ -38,3 +38,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ## DB Structure
 
 https://app.eraser.io/workspace/K3gHXF9PUz69zrRu8TjK?origin=share
+
+**Note :** All the protected routes will be kept in `app/(main)` folder.

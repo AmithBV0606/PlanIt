@@ -9,7 +9,7 @@ export const checkUser = async () => {
   }
 
   try {
-    const loggedInUser = await prisma.user.findUnique({
+    const loggedInUser = await prisma?.user.findUnique({
       where: {
         clerkUserId: user.id,
       },
