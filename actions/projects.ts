@@ -10,7 +10,7 @@ interface ProjectData {
   organizationId?: string;
 }
 
-export async function createProject(data : ProjectData) {
+export async function createProject(data: ProjectData) {
   const { userId, orgId } = auth();
 
   if (!userId) {
@@ -50,4 +50,32 @@ export async function createProject(data : ProjectData) {
   } catch (error: any) {
     throw new Error("Error creating project: " + error.message);
   }
+}
+
+export async function getProjects(orgId: string) {
+  const { userId } = auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Find user to verify existence
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const projects = await prisma.project.findMany({
+    where: {
+      organizationId: orgId,
+    },
+    orderBy: {
+      createdAt: 'desc'
+    },
+  });
+
+  return projects;
 }
