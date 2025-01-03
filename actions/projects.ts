@@ -52,34 +52,6 @@ export async function createProject(data: ProjectData) {
   }
 }
 
-export async function getProjects(orgId: string) {
-  const { userId } = auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  // Find user to verify existence
-  const user = await prisma.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  const projects = await prisma.project.findMany({
-    where: {
-      organizationId: orgId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  return projects;
-}
-
 export async function deleteProject(projectId: string) {
   const { userId, orgId, orgRole } = auth();
 
@@ -103,9 +75,51 @@ export async function deleteProject(projectId: string) {
 
   await prisma.project.delete({
     where: {
-      id: projectId
-    }
+      id: projectId,
+    },
   });
 
-  return { success: true }
+  return { success: true };
+}
+
+export async function getProject(projectId: string) {
+  const { userId, orgId } = auth();
+
+  if (!userId || !orgId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Find user to verify existence
+  const user = await prisma.user.findUnique({
+    where: {
+      clerkUserId: userId,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // Get project with sprints and organization
+  const project = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+    include: {
+      sprints: {
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  if (!project) {
+    return null;
+  }
+
+  // Verify project belongs to the organization
+  if (project.organizationId !== orgId) {
+    return null;
+  }
+
+  return project;
 }

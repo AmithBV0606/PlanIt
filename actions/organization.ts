@@ -45,3 +45,31 @@ export async function getOrganization({ slug }: { slug: string }) {
 
   return organization;
 }
+
+export async function getProjects(orgId: string) {
+  const { userId } = auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Find user to verify existence
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const projects = await prisma.project.findMany({
+    where: {
+      organizationId: orgId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return projects;
+}

@@ -1,4 +1,4 @@
-import { getProjects } from "@/actions/projects";
+import { getProjects } from "@/actions/organization";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import DeleteProject from "./delete-project";
