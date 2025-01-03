@@ -73,9 +73,39 @@ export async function getProjects(orgId: string) {
       organizationId: orgId,
     },
     orderBy: {
-      createdAt: 'desc'
+      createdAt: "desc",
     },
   });
 
   return projects;
+}
+
+export async function deleteProject(projectId: string) {
+  const { userId, orgId, orgRole } = auth();
+
+  if (!userId || !orgId) {
+    throw new Error("Unauthorized");
+  }
+
+  if (orgRole !== "org:admin") {
+    throw new Error("Only organization admins can delete projects.");
+  }
+
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+  });
+
+  if (!prisma || project?.organizationId !== orgId) {
+    throw new Error(
+      "Project not found or you don't have permission to delete it"
+    );
+  }
+
+  await prisma.project.delete({
+    where: {
+      id: projectId
+    }
+  });
+
+  return { success: true }
 }
