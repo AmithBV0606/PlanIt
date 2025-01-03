@@ -10,6 +10,10 @@ import { Input } from "@/components/ui/input";
 import { FormInput } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import useFetch from "@/hooks/use-fetch";
+import { createProject } from "@/actions/projects";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface FormInput {
   name: string;
@@ -21,6 +25,7 @@ const CreateProjectPage = () => {
   const { isLoaded: isOrgLoaded, membership } = useOrganization();
   const { isLoaded: isUserLoaded } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -35,6 +40,20 @@ const CreateProjectPage = () => {
       setIsAdmin(membership.role === "org:admin");
     }
   }, [isOrgLoaded, isUserLoaded, membership]);
+
+  const {
+    data: project,
+    loading,
+    error,
+    fn: createProjectFn,
+  } = useFetch(createProject);
+
+  useEffect(() => {
+    if (project) {
+      toast.success("Project created successfully");
+      router.push(`/project/${project.id}`);
+    }
+  }, [loading]);
 
   if (!isOrgLoaded || !isUserLoaded) {
     return null;
@@ -51,7 +70,9 @@ const CreateProjectPage = () => {
     );
   }
 
-  const onSubmit = async () => {};
+  const onSubmit = async (data: FormInput) => {
+    createProjectFn(data);
+  };
 
   return (
     <div className="container mx-auto py-10">
@@ -105,12 +126,14 @@ const CreateProjectPage = () => {
         </div>
 
         <Button
+          disabled={loading ? true : false}
           type="submit"
           size={"lg"}
           className="bg-blue-700 text-white hover:bg-blue-600"
         >
-          Create Project
+          {loading ? "Creating..." : "Create Project"}
         </Button>
+        {error && <p className="text-red-500 text-sm mt-1">{error?.message}</p>}
       </form>
     </div>
   );
