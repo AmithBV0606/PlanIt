@@ -1,6 +1,7 @@
 import { getProject } from "@/actions/projects";
 import { notFound } from "next/navigation";
 import SprintCreationForm from "../_components/create-sprint";
+import SprintBoard from "../_components/sprint-board";
 
 const ProjectPage = async ({ params }: any) => {
   const { projectId } = await params;
@@ -24,6 +25,16 @@ const ProjectPage = async ({ params }: any) => {
       />
 
       {/* Sprint Board */}
+      {project.sprints.length > 0 ? (
+        <SprintBoard
+          sprints={project.sprints}
+          projectId={projectId}
+          orgId={project.organizationId}
+        />
+        // <></>
+      ) : (
+        <div>Craete a Sprint from  button above</div>
+      )}
     </div>
   );
 };
