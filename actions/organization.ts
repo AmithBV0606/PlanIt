@@ -73,3 +73,39 @@ export async function getProjects(orgId: string) {
 
   return projects;
 }
+
+export async function getOrganizationUsers(orgId: string) {
+  const { userId } = auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const organizationMemberships =
+    await clerkClient().organizations.getOrganizationMembershipList({
+      organizationId: orgId,
+    });
+
+    // Changes made by chatgpt
+  const userIds = organizationMemberships.data
+    .map((membership) => membership.publicUserData?.userId)
+    .filter((userId) => userId !== undefined);
+
+  const users = await prisma.user.findMany({
+    where: {
+      clerkUserId: {
+        in: userIds,
+      },
+    },
+  });
+
+  return users;
+}
