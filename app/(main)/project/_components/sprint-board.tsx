@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SprintManager from "./sprint-manager";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import statuses from "@/data/status.json";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import IssueCreationDrawer from "./create-issue";
+import useFetch from "@/hooks/use-fetch";
+import { getIssuesForSprint } from "@/actions/issues";
+import { BarLoader } from "react-spinners";
+import IssueCard from "@/components/issue-card";
 
 interface SprintBoardProps {
   id: string;
@@ -31,16 +35,36 @@ const SprintBoard = ({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
 
-  const onDragEnd = () => {};
-
   const handleAddIssue = (status: any) => {
     setSelectedStatus(status);
     setIsDrawerOpen(true);
   };
 
+  const {
+    loading: issuesLoading,
+    error: issuesError,
+    fn: fetchIssues,
+    data: issues,
+    setData: setIssues,
+  } = useFetch(getIssuesForSprint);
+
+  console.log("Issues Array : ", issues);
+
+  useEffect(() => {
+    if (currentSprint.id) {
+      fetchIssues(currentSprint.id);
+    }
+  }, [currentSprint.id]);
+
+  const [filteredIssue, setFilteredissue] = useState(issues);
+
   const handleIssueCreated = () => {
-    // fetch issues again
-  }
+    fetchIssues(currentSprint.id);
+  };
+
+  const onDragEnd = () => {};
+
+  if (issuesError) return <div>Error loading issues!</div>;
 
   return (
     <div>
@@ -51,6 +75,10 @@ const SprintBoard = ({
         sprints={sprints}
         projectId={projectId}
       />
+
+      {issuesLoading && (
+        <BarLoader className="mt-4" width={"100%"} color="#36d7b7" />
+      )}
 
       {/* Kanban Board */}
       <DragDropContext onDragEnd={onDragEnd}>
@@ -69,6 +97,35 @@ const SprintBoard = ({
                     </h3>
 
                     {/* Issues */}
+
+                    {issues
+                      ?.filter((issue) => issue.status === column.key)
+                      .map((issue, index) => (
+                        <Draggable
+                          key={issue.id}
+                          draggableId={issue.id}
+                          index={index}
+                        >
+                          {(provided) => {
+                            return (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                <IssueCard
+                                  // @ts-ignore
+                                  issue={issue}
+                                  showStatus={false}
+                                  onDelete={() => console.log("Delete")}
+                                  onUpdate={() => console.log("Update")}
+                                />
+                              </div>
+                            );
+                          }}
+                        </Draggable>
+                      ))}
+
                     {provided.placeholder}
                     {column.key === "TODO" &&
                       currentSprint.status !== "COMPLETED" && (
