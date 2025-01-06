@@ -71,3 +71,22 @@ export async function createIssue(projectId: string, data: IssuesDataProps) {
 
   return issue;
 }
+
+export async function getIssuesForSprint(sprintId: string) {
+  const { userId, orgId } = auth();
+
+  if (!userId || !orgId) {
+    throw new Error("Unauthorized");
+  }
+
+  const issues = await prisma.issue.findMany({
+    where: { sprintId },
+    orderBy: [{ status: "asc" }, { order: "asc" }],
+    include: {
+      assignee: true,
+      reporter: true,
+    },
+  });
+
+  return issues;
+}
