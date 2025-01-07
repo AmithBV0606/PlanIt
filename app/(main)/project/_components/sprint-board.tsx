@@ -8,9 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import IssueCreationDrawer from "./create-issue";
 import useFetch from "@/hooks/use-fetch";
-import { getIssuesForSprint } from "@/actions/issues";
+import { getIssuesForSprint, updateIssueOrder } from "@/actions/issues";
 import { BarLoader } from "react-spinners";
 import IssueCard from "@/components/issue-card";
+import { toast } from "sonner";
+
+function reorder(list: any, startIndex: number, endIndex: number) {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+}
 
 interface SprintBoardProps {
   id: string;
@@ -62,7 +71,88 @@ const SprintBoard = ({
     fetchIssues(currentSprint.id);
   };
 
-  const onDragEnd = () => {};
+  const {
+    fn: updateIssueOderFn,
+    loading: updateIssuesLoading,
+    error: updateIssuesError,
+  } = useFetch(updateIssueOrder);
+
+  const onDragEnd = async (result: any) => {
+    if (currentSprint.status === "PLANNED") {
+      toast.warning("Start the sprint to update the board!");
+      return;
+    }
+
+    if (currentSprint.status === "COMPLETED") {
+      toast.warning("Cannot update the board after the sprint has ended!");
+      return;
+    }
+
+    const { destination, source } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    // @ts-ignore
+    const newOrderedData = [...issues];
+
+    // Source and destination lists
+    const sourceList = newOrderedData.filter(
+      (list) => list.status === source.droppableId
+    );
+
+    const destinationList = newOrderedData.filter(
+      (list) => list.status === destination.droppableId
+    );
+
+    // If source and ddestination are same
+    if (source.droppableId === destination.droppableId) {
+      const reorderedCards = reorder(
+        sourceList,
+        source.index,
+        destination.index
+      );
+
+      reorderedCards.forEach((card, i) => {
+        // @ts-ignore
+        card.order = i;
+      });
+    } else {
+      // Remove card from the source list
+      const [movedCard] = sourceList.splice(source.index, 1);
+
+      // assign the new list id to the moved card
+      movedCard.status = destination.droppableId;
+
+      // Add new card to the destination list
+      destinationList.splice(destination.index, 0, movedCard);
+
+      sourceList.forEach((card, i) => {
+        card.order = i;
+      });
+
+      // Update the order for each card in destination list
+      destinationList.forEach((card, i) => {
+        card.order = i;
+      });
+    }
+
+    const sortedIssues = newOrderedData.sort((a, b) => a.order - b.order);
+    // setIssues(newOrderedData, sortedIssues);
+    setIssues(newOrderedData);
+
+    // Do api call
+
+    updateIssueOderFn(sortedIssues);
+  };
 
   if (issuesError) return <div>Error loading issues!</div>;
 
@@ -76,7 +166,11 @@ const SprintBoard = ({
         projectId={projectId}
       />
 
-      {issuesLoading && (
+      {updateIssuesError && (
+        <p className="text-red-500 mt-2">{updateIssuesError.message}</p>
+      )}
+
+      {(updateIssuesLoading || issuesLoading) && (
         <BarLoader className="mt-4" width={"100%"} color="#36d7b7" />
       )}
 

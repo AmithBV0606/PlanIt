@@ -110,6 +110,8 @@ const IssueCard = ({
           <div className="text-xs text-gray-400 w-full">Created {created}</div>
         </CardFooter>
       </Card>
+
+      {isDialogOpen && <></>}
     </>
   );
 };

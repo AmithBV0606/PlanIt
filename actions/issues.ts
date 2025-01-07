@@ -91,53 +91,26 @@ export async function getIssuesForSprint(sprintId: string) {
   return issues;
 }
 
-// type AssigneeProp = {
-//   id: string;
-//   createdAt: Date;
-//   updatedAt: Date;
-//   name: string;
-//   clerkUserId: string;
-//   email: string;
-//   imageUrl: string;
-// } ;
+export async function updateIssueOrder(updatedIssues: any) {
+  const { userId, orgId } = auth();
 
-// type ReporterProp = {
-//   id: string;
-//   clerkUserId: string;
-//   email: string;
-//   name: string;
-//   imageUrl: string;
-//   createdAt: Date;
-//   updatedAt: Date;
-// };
+  if (!userId || !orgId) {
+    throw new Error("Unauthorized");
+  }
 
-// enum IssuePriority {
-//   LOW = "LOW",
-//   MEDIUM = "MEDIUM",
-//   HIGH = "HIGH",
-//   URGENT = "URGENT",
-// }
+  // Start a transaction
+  await prisma.$transaction(async (prisma) => {
+    // Update each issue
+    for (const issue of updatedIssues) {
+      await prisma.issue.update({
+        where: { id: issue.id },
+        data: {
+          status: issue.status,
+          order: issue.order,
+        },
+      });
+    }
+  });
 
-// enum IssueStatus {
-//   TODO = "TODO",
-//   IN_PROGRESS = "IN_PROGRESS",
-//   IN_REVIEW = "IN_PREVIEW",
-//   DONE = "DONE",
-// }
-
-// interface IssueCardProps {
-//   assignee: AssigneeProp;
-//   assigneeId: string;
-//   createdAt: Date;
-//   description?: string;
-//   id: string;
-//   order: number;
-//   priority: IssuePriority;
-//   projectId: string;
-//   reporter: ReporterProp;
-//   reporterId: string;
-//   sprintId: string;
-//   status: IssueStatus;
-//   title: string;
-//   updatedAt: Date;
-// }
+  return { success: true };
+}
