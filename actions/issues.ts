@@ -114,3 +114,75 @@ export async function updateIssueOrder(updatedIssues: any) {
 
   return { success: true };
 }
+
+export async function deleteIssue(issueId: string) {
+  const { userId, orgId } = auth();
+
+  if (!userId || !orgId) {
+    throw new Error("Unauthorized");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const issue = await prisma.issue.findUnique({
+    where: { id: issueId },
+    include: { project: true },
+  });
+
+  if (!issue) {
+    throw new Error("Issue not found");
+  }
+
+  if (issue.reporterId !== user.id) {
+    throw new Error("You don't have permission to delete this issue");
+  }
+
+  await prisma.issue.delete({ where: { id: issueId } });
+
+  return { success: true };
+}
+
+export async function updateIssue(issueId: string, data: any) {
+  const { userId, orgId } = auth();
+
+  if (!userId || !orgId) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    const issue = await prisma.issue.findUnique({
+      where: { id: issueId },
+      include: { project: true },
+    });
+
+    if (!issue) {
+      throw new Error("Issue not found");
+    }
+
+    if (issue.project.organizationId !== orgId) {
+      throw new Error("Unauthorized");
+    }
+
+    const updatedIssue = await prisma.issue.update({
+      where: { id: issueId },
+      data: {
+        status: data.status,
+        priority: data.priority,
+      },
+      include: {
+        assignee: true,
+        reporter: true,
+      },
+    });
+
+    return updatedIssue;
+  } catch (error: any) {
+    throw new Error("Error updating issue: " + error.message);
+  }
+}
