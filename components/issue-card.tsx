@@ -10,6 +10,8 @@ import { Badge } from "./ui/badge";
 import UserAvatar from "./user-avatar";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import IssueDetailsDialog from "./issue-details-dialog";
 
 const priorityColor = {
   LOW: "border-green-600",
@@ -78,9 +80,22 @@ const IssueCard = ({
   issue: IssueCardProps;
   showStatus: boolean;
   onDelete: () => void;
-  onUpdate: () => void;
+  onUpdate: (updated: IssueCardProps) => void;
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const router = useRouter();
+
+  const onDeleteHandler = (...params: any) => {
+    router.refresh();
+    // @ts-ignore
+    onDelete(...params);
+  };
+
+  const onUpdateHandler = (...params: any) => {
+    router.refresh();
+    // @ts-ignore
+    onUpdate(...params);
+  };
 
   const created = formatDistanceToNow(new Date(issue.createdAt), {
     addSuffix: true,
@@ -88,7 +103,10 @@ const IssueCard = ({
 
   return (
     <>
-      <Card className="cursor-pointer hover:shadow-md transition-shadow">
+      <Card
+        className="cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => setIsDialogOpen(true)}
+      >
         <CardHeader
           className={`border-t-2 ${priorityColor[issue.priority]} rounded-lg`}
         >
@@ -111,7 +129,16 @@ const IssueCard = ({
         </CardFooter>
       </Card>
 
-      {isDialogOpen && <></>}
+      {isDialogOpen && (
+        <IssueDetailsDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          issue={issue}
+          onDelete={onDeleteHandler}
+          onUpdate={onUpdateHandler}
+          borderCol={priorityColor[issue.priority]}
+        />
+      )}
     </>
   );
 };

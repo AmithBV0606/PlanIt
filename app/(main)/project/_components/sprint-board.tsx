@@ -29,6 +29,57 @@ interface SprintBoardProps {
   status: string;
 }
 
+type AssigneeProp = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  clerkUserId: string;
+  email: string;
+  imageUrl: string;
+};
+
+type ReporterProp = {
+  id: string;
+  clerkUserId: string;
+  email: string;
+  name: string;
+  imageUrl: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+enum IssuePriority {
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  URGENT = "URGENT",
+}
+
+enum IssueStatus {
+  TODO = "TODO",
+  IN_PROGRESS = "IN_PROGRESS",
+  IN_REVIEW = "IN_PREVIEW",
+  DONE = "DONE",
+}
+
+interface IssueCardProps {
+  assignee: AssigneeProp | null;
+  assigneeId: string;
+  createdAt: Date;
+  description?: string;
+  id: string;
+  order: number;
+  priority: IssuePriority;
+  projectId: string;
+  reporter: ReporterProp;
+  reporterId: string;
+  sprintId: string;
+  status: IssueStatus;
+  title: string;
+  updatedAt: Date;
+}
+
 const SprintBoard = ({
   sprints,
   projectId,
@@ -199,6 +250,7 @@ const SprintBoard = ({
                           key={issue.id}
                           draggableId={issue.id}
                           index={index}
+                          isDragDisabled={updateIssuesLoading ? true : false}
                         >
                           {(provided) => {
                             return (
@@ -211,8 +263,16 @@ const SprintBoard = ({
                                   // @ts-ignore
                                   issue={issue}
                                   showStatus={false}
-                                  onDelete={() => console.log("Delete")}
-                                  onUpdate={() => console.log("Update")}
+                                  onDelete={() => fetchIssues(currentSprint.id)}
+                                  onUpdate={(updated: any) =>
+                                    setIssues((issues) =>
+                                      issues?.map((issue) => {
+                                        if (issue.id == updated.id)
+                                          return updated;
+                                        return issue;
+                                      })
+                                    )
+                                  }
                                 />
                               </div>
                             );
