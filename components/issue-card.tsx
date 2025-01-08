@@ -1,4 +1,5 @@
-import { boolean } from "zod";
+"use client";
+
 import {
   Card,
   CardContent,
@@ -79,8 +80,8 @@ const IssueCard = ({
 }: {
   issue: IssueCardProps;
   showStatus: boolean;
-  onDelete: () => void;
-  onUpdate: (updated: IssueCardProps) => void;
+  onDelete?: () => void;
+  onUpdate?: (updated: IssueCardProps) => void;
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
