@@ -12,6 +12,7 @@ import { getIssuesForSprint, updateIssueOrder } from "@/actions/issues";
 import { BarLoader } from "react-spinners";
 import IssueCard from "@/components/issue-card";
 import { toast } from "sonner";
+import BoardFilters from "./board-filters";
 
 function reorder(list: any, startIndex: number, endIndex: number) {
   const result = Array.from(list);
@@ -108,7 +109,7 @@ const SprintBoard = ({
     setData: setIssues,
   } = useFetch(getIssuesForSprint);
 
-  console.log("Issues Array : ", issues);
+  // console.log("Issues Array : ", issues);
 
   useEffect(() => {
     if (currentSprint.id) {
@@ -117,6 +118,10 @@ const SprintBoard = ({
   }, [currentSprint.id]);
 
   const [filteredIssue, setFilteredissue] = useState(issues);
+
+  const handleFilterChange = (newFilteredIssue: any) => {
+    setFilteredissue(newFilteredIssue);
+  };
 
   const handleIssueCreated = () => {
     fetchIssues(currentSprint.id);
@@ -217,6 +222,14 @@ const SprintBoard = ({
         projectId={projectId}
       />
 
+      {issues && !issuesLoading && (
+        <BoardFilters
+          // @ts-ignore
+          issues={issues}
+          onFilterChange={handleFilterChange}
+        />
+      )}
+
       {updateIssuesError && (
         <p className="text-red-500 mt-2">{updateIssuesError.message}</p>
       )}
@@ -243,7 +256,7 @@ const SprintBoard = ({
 
                     {/* Issues */}
 
-                    {issues
+                    {filteredIssue
                       ?.filter((issue) => issue.status === column.key)
                       .map((issue, index) => (
                         <Draggable
