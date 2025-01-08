@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 
-export async function getOrganization({ slug }: { slug: string }) {
+export async function getOrganization(slug: string) {
   const { userId } = auth();
 
   if (!userId) {

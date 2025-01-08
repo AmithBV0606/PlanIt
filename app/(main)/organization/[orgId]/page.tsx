@@ -13,7 +13,7 @@ const Organization = async ({ params }: any) => {
     redirect("/sign-in");
   }
 
-  const organization = await getOrganization({ slug: orgId });
+  const organization = await getOrganization(orgId);
 
   if (!organization) {
     return <div>Organization not found</div>;

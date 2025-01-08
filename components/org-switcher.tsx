@@ -17,6 +17,7 @@ const OrgSwitcher = () => {
   return (
     <div>
       <SignedIn>
+        {/* @ts-ignore */}
         <OrganizationSwitcher
           hidePersonal
           afterCreateOrganizationUrl={"/organization/:slug"}
